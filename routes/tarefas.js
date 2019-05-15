@@ -10,8 +10,6 @@ router.get("/", verifyToken, (req, res, next) => {
   const titulo = req.query.titulo;
   const concluido = req.query.concluido;
   const idUsuario = req.id;
-  // const listUser = filterByUsuario(idUsuario);
-  // console.log("TESTE FUNC USER", listUser);
 
   const where = {};
   if (idUsuario) {
