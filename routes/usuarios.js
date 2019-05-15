@@ -162,9 +162,6 @@ router.post("/", (req, res, next) => {
 router.post("/login", (req, res) => {
   const { email, senha } = req.body;
 
-  console.log('BODY SEM SENHA', req.body );
-  
-
   Usuario.findOne({
     where: {
       email: email

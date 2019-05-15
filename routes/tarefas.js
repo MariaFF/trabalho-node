@@ -32,7 +32,6 @@ router.get("/", verifyToken, (req, res, next) => {
       res.status(200).json(tarefas);
     })
     .catch(error => {
-      console.log(error);
       res.status(422).send();
     });
 });
@@ -59,7 +58,6 @@ router.get("/:tarefaId", verifyToken, (req, res, next) => {
       }
     })
     .catch(error => {
-      console.log(error);
       res.status(422).send();
     });
 });
@@ -110,24 +108,17 @@ router.put("/:tarefaId", verifyToken, (req, res, next) => {
   })
     .then(tarefa => {
       if (tarefa) {
-        console.log("aqui", tarefa.usuarioId);
-        console.log("aqui REQ", req.id);
         if (tarefa.usuarioId === req.id) {
-          console.log("aqui USER ID", req.id);
-
-          return (
-            tarefa
-              .update({
-                titulo: body.titulo,
-                descricao: body.descricao,
-                concluido: body.concluido
-              })
-              //então manda a tarefa atualizado
-              .then(tarefaAtualizada => {
-                const tarefaJson = tarefaAtualizada.toJSON();
-                res.status(200).json(tarefaJson);
-              })
-          );
+          return tarefa
+            .update({
+              titulo: body.titulo,
+              descricao: body.descricao,
+              concluido: body.concluido
+            })
+            .then(tarefaAtualizada => {
+              const tarefaJson = tarefaAtualizada.toJSON();
+              res.status(200).json(tarefaJson);
+            });
         } else {
           res.status(404).send("Tarefa não cadastrada para esse usuario");
         }
@@ -136,7 +127,6 @@ router.put("/:tarefaId", verifyToken, (req, res, next) => {
       }
     })
     .catch(error => {
-      console.log(error);
       res.status(422).send();
     });
 });
@@ -144,7 +134,6 @@ router.put("/:tarefaId", verifyToken, (req, res, next) => {
 //PUT /tarefas/id
 router.put("/:tarefaId/concluido", verifyToken, (req, res, next) => {
   const tarefaId = req.params.tarefaId;
-  const body = req.body;
 
   Tarefa.findOne({
     where: {
@@ -154,17 +143,14 @@ router.put("/:tarefaId/concluido", verifyToken, (req, res, next) => {
     .then(tarefa => {
       if (tarefa) {
         if (tarefa.usuarioId === req.id) {
-          return (
-            tarefa
-              .update({
-                concluido: true
-              })
-              //então manda a tarefa atualizado
-              .then(tarefaAtualizada => {
-                const tarefaJson = tarefaAtualizada.toJSON();
-                res.status(200).json(tarefaJson);
-              })
-          );
+          return tarefa
+            .update({
+              concluido: true
+            })
+            .then(tarefaAtualizada => {
+              const tarefaJson = tarefaAtualizada.toJSON();
+              res.status(200).json(tarefaJson);
+            });
         } else {
           res.status(404).send("Tarefa não cadastrada para esse usuario");
         }
@@ -173,7 +159,38 @@ router.put("/:tarefaId/concluido", verifyToken, (req, res, next) => {
       }
     })
     .catch(error => {
-      console.log(error);
+      res.status(422).send();
+    });
+});
+
+//DEL /tarefas/id
+router.delete("/:tarefaId/concluido", verifyToken, (req, res, next) => {
+  const tarefaId = req.params.tarefaId;
+
+  Tarefa.findOne({
+    where: {
+      id: tarefaId
+    }
+  })
+    .then(tarefa => {
+      if (tarefa) {
+        if (tarefa.usuarioId === req.id) {
+          return tarefa
+            .update({
+              concluido: false
+            })
+            .then(tarefaAtualizada => {
+              const tarefaJson = tarefaAtualizada.toJSON();
+              res.status(200).json(tarefaJson);
+            });
+        } else {
+          res.status(404).send("Tarefa não cadastrada para esse usuario");
+        }
+      } else {
+        res.status(404).send("Tarefa não encontrada");
+      }
+    })
+    .catch(error => {
       res.status(422).send();
     });
 });
@@ -187,8 +204,6 @@ router.post("/", verifyToken, (req, res, next) => {
     descricao: tarefa.descricao,
     concluido: tarefa.concluido,
     usuarioId: req.id
-
-    //ver como pegar o usuario logado
   })
     .then(tarefaCriada => {
       res.status(201).json(tarefaCriada);
@@ -207,17 +222,5 @@ router.post("/", verifyToken, (req, res, next) => {
       res.status(422).send;
     });
 });
-
-function filterByUsuario(id) {
-  Tarefa.findAll({
-    where: {
-      usuarioId: id
-    }
-  })
-    .then(tarefasUser => tarefasUser)
-    .catch(error => {
-      error: "Usuario não possui tarefas cadastradas";
-    });
-}
 
 module.exports = router;
